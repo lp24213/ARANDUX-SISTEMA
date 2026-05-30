@@ -1,0 +1,30 @@
+NOTE: Git is not available in this execution environment, so I couldn't generate a real git patch file.
+
+I modified the following files (see modified-files.txt):
+- frontend/src/components/LoginPage.tsx
+- frontend/src/components/RegisterPage.tsx
+- frontend/src/hooks/useEncryptedNavigate.ts
+- frontend/src/components/ProtectedRoute.tsx
+- frontend/src/components/EncryptedRoute.tsx
+- frontend/src/components/EncryptedLink.tsx
+- frontend/src/components/DashboardModern.tsx
+- frontend/src/components/CheckoutPage.tsx
+- backend/src/cloudflare-worker.ts
+
+What you should run locally to create the patch and push:
+
+# (run in PowerShell)
+cd "C:\Users\luisp\OneDrive\Área de Trabalho\ARANDUX"
+# Create branch and commit
+git checkout -B chore/pwa-webhook-fixes
+git add -A
+git commit -m "chore: PWA + dynamic routeEncryption imports; webhook constant-time verification; build fixes"
+# Create patch of last commit
+git format-patch -1 --stdout > arandux-changes.patch
+# Or to see modified files
+git diff --name-only HEAD^ HEAD > modified-files.txt
+
+# To push and create PR (after review):
+git push origin chore/pwa-webhook-fixes
+
+If you want, I can attempt to push for you if you provide remote permissions/token; otherwise run the commands above locally.

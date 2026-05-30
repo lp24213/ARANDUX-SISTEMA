@@ -1,0 +1,66 @@
+name = "arandux-api"
+main = "src/cloudflare-worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Workers AI
+[ai]
+binding = "AI"
+
+# Cloudflare R2 Storage (para upload de arquivos sem custos extras)
+# Configure o bucket R2 no dashboard do Cloudflare e adicione as credenciais via secrets:
+# wrangler secret put R2_ACCOUNT_ID --env production
+# wrangler secret put R2_ACCESS_KEY_ID --env production
+# wrangler secret put R2_SECRET_ACCESS_KEY --env production
+# wrangler secret put R2_BUCKET_NAME --env production
+# wrangler secret put R2_PUBLIC_URL --env production
+# R2 comentado temporariamente - habilitar após configurar no dashboard
+# [[r2_buckets]]
+# binding = "R2_STORAGE"
+# bucket_name = "arandux-files"
+# preview_bucket_name = "arandux-files-preview"
+
+[env.production]
+name = "arandux-api"
+routes = [
+  { pattern = "api.arandux.com/*", zone_name = "arandux.com" },
+  { pattern = "*.arandux.com/api/*", zone_name = "arandux.com" }
+]
+workers_dev = true
+
+[env.production.ai]
+binding = "AI"
+
+# [[env.production.r2_buckets]]
+# binding = "R2_STORAGE"
+# bucket_name = "arandux-files"
+# Habilitar após configurar o bucket R2 no dashboard do Cloudflare
+
+# R2 comentado temporariamente - habilitar após configurar no dashboard
+# [[r2_buckets]]
+# binding = "R2_STORAGE"
+# bucket_name = "arandux-files"
+# preview_bucket_name = "arandux-files-preview"
+
+[env.production.vars]
+NODE_ENV = "production"
+FRONTEND_URL = "https://www.arandux.com"
+# Webhooks Pagar.me / gateways: mesma origem do Worker (api.arandux.com)
+API_PUBLIC_URL = "https://api.arandux.com"
+NFE_PROVIDER = "nuvemfiscal"
+NUVEMFISCAL_SANDBOX = "false"
+ASAAS_SANDBOX = "false"
+BOLETO_PROVIDER = "pagarme"
+PIX_PROVIDER = "pagarme"
+
+# Turso Database - Configure via secrets:
+# wrangler secret put DATABASE_URL --env production
+# wrangler secret put DATABASE_TOKEN --env production
+# wrangler secret put NUVEMFISCAL_API_KEY_PUBLIC --env production
+# wrangler secret put NUVEMFISCAL_API_KEY_PRIVATE --env production
+# wrangler secret put ASAAS_API_TOKEN --env production
+# wrangler secret put ASAAS_WEBHOOK_SECRET --env production
+# wrangler secret put JWT_ACCESS_SECRET --env production
+# wrangler secret put JWT_REFRESH_SECRET --env production
+# Formato DATABASE_URL: libsql://<database-name>-<org-name>.turso.io
+# Formato DATABASE_TOKEN: eyJ... (token do Turso)

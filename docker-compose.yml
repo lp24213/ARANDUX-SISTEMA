@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: colmeia_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: colmeia_main
+      MYSQL_USER: colmeia_user
+      MYSQL_PASSWORD: colmeia_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: ["--default-authentication-plugin=mysql_native_password"]
+
+  adminer:
+    image: adminer:4
+    container_name: colmeia_adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+  redis:
+    image: redis:7
+    container_name: colmeia_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: colmeia_backend
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mysql://colmeia_user:colmeia_password@mysql:3306/colmeia_main
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+      - redis
+    command: ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:3000/api
+    container_name: colmeia_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  electron:
+    build:
+      context: ./electron
+      dockerfile: Dockerfile
+    container_name: colmeia_electron
+    env_file:
+      - .env
+    depends_on:
+      - frontend
+    # Electron is mainly for packaging; usually not run inside compose in dev.
+    command: ["npm", "run", "start"]
+
+volumes:
+  mysql_data:
+
+
